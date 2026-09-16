@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Roda Spinner</title>
+    <title>Roda Spinner - Multi Kategori</title>
     <style>
       :root {
         --bg-color: #0f172a;
@@ -43,7 +43,7 @@
         border: 1px solid var(--border-color);
         position: relative;
         width: 100%;
-        max-width: 480px;
+        max-width: 520px;
       }
 
       .header-actions {
@@ -51,7 +51,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
       }
 
       .back-link,
@@ -70,14 +70,42 @@
         color: var(--accent-color);
       }
 
+      /* Tab Kategori Switcher */
+      .category-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .tab-btn {
+        padding: 8px 12px;
+        background: #0f172a;
+        border: 1px solid var(--border-color);
+        color: #94a3b8;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab-btn.active {
+        background: var(--accent-color);
+        color: #000;
+        border-color: var(--accent-color);
+        font-weight: 800;
+      }
+
       .wheel-wrapper {
         position: relative;
         width: 340px;
         height: 340px;
-        margin-top: 10px;
+        margin-top: 5px;
       }
 
-      /* Jarum Penunjuk */
       .pointer {
         position: absolute;
         top: -15px;
@@ -128,9 +156,7 @@
         transform: none;
       }
 
-      /* =========================================================
-       VOCAL POINT HASIL SPINNER (SANGAT JELAS & HIGH CONTRAST)
-       ========================================================= */
+      /* Vocal Point Display Hasil */
       .result-container {
         margin-top: 25px;
         width: 100%;
@@ -146,7 +172,6 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      /* Efek sorot ketika hasil keluar */
       .result-container.active {
         border-color: var(--accent-color);
         box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
@@ -162,9 +187,8 @@
         font-weight: 700;
       }
 
-      /* Vocal Point Teks Utama */
       .result-value {
-        font-size: 2.6rem; /* Font Size Ekstra Besar */
+        font-size: 2.6rem;
         font-weight: 900;
         color: #f59e0b;
         text-align: center;
@@ -173,7 +197,6 @@
         text-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
       }
 
-      /* Keyframe Animasi Zoom In Pop-Up */
       .result-value.animate {
         animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       }
@@ -195,7 +218,53 @@
       <div class="header-actions">
         <a href="index.html" class="back-link">⚙️ Edit Pengaturan</a>
         <button class="reset-btn" onclick="resetDisabledItems()">
-          🔄 Reset Nilai Disabled
+          🔄 Reset Kategori Ini
+        </button>
+      </div>
+
+      <!-- Switcher Kategori -->
+      <div class="category-tabs">
+        <button
+          class="tab-btn"
+          data-cat="SD_PA"
+          onclick="switchCategory('SD_PA')"
+        >
+          SD PA
+        </button>
+        <button
+          class="tab-btn"
+          data-cat="SD_PI"
+          onclick="switchCategory('SD_PI')"
+        >
+          SD PI
+        </button>
+        <button
+          class="tab-btn"
+          data-cat="SMP_PA"
+          onclick="switchCategory('SMP_PA')"
+        >
+          SMP PA
+        </button>
+        <button
+          class="tab-btn"
+          data-cat="SMP_PI"
+          onclick="switchCategory('SMP_PI')"
+        >
+          SMP PI
+        </button>
+        <button
+          class="tab-btn"
+          data-cat="SMA_PA"
+          onclick="switchCategory('SMA_PA')"
+        >
+          SMA PA
+        </button>
+        <button
+          class="tab-btn"
+          data-cat="SMA_PI"
+          onclick="switchCategory('SMA_PI')"
+        >
+          SMA PI
         </button>
       </div>
 
@@ -206,7 +275,6 @@
 
       <button id="spinBtn" class="btn-spin" onclick="spin()">SPIN!</button>
 
-      <!-- Vocal Point Hasil -->
       <div id="resultBox" class="result-container">
         <div class="result-label" id="resultLabel">SIAP MEMUTAR</div>
         <div id="resultValue" class="result-value">-</div>
@@ -225,9 +293,37 @@
         "#84cc16",
       ];
 
+      const defaultData = {
+        SD_PA: {
+          items: ["SD PA 1", "SD PA 2", "SD PA 3", "SD PA 4", "SD PA 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+        SD_PI: {
+          items: ["SD PI 1", "SD PI 2", "SD PI 3", "SD PI 4", "SD PI 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+        SMP_PA: {
+          items: ["SMP PA 1", "SMP PA 2", "SMP PA 3", "SMP PA 4", "SMP PA 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+        SMP_PI: {
+          items: ["SMP PI 1", "SMP PI 2", "SMP PI 3", "SMP PI 4", "SMP PI 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+        SMA_PA: {
+          items: ["SMA PA 1", "SMA PA 2", "SMA PA 3", "SMA PA 4", "SMA PA 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+        SMA_PI: {
+          items: ["SMA PI 1", "SMA PI 2", "SMA PI 3", "SMA PI 4", "SMA PI 5"],
+          seq: [0, 2, 3, 4, 1],
+        },
+      };
+
+      let activeCategory = "SD_PA";
       let items = [];
       let sequence = [];
-      let disabledIndices = new Set(); // Menyimpan index item yang di-disabled
+      let disabledIndices = new Set();
 
       let currentRotation = 0;
       let isSpinning = false;
@@ -240,28 +336,62 @@
       const resultValue = document.getElementById("resultValue");
 
       window.onload = () => {
-        const savedItems = localStorage.getItem("spinner_items");
-        const savedSeq = localStorage.getItem("spinner_sequence");
-        const savedDisabled = localStorage.getItem("spinner_disabled");
+        activeCategory =
+          localStorage.getItem("spinner_active_category") || "SD_PA";
+        loadSpinnerData(activeCategory);
+      };
 
-        if (!savedItems || !savedSeq) {
-          alert(
-            "Data pengaturan belum ada, Anda akan diarahkan ke halaman setting.",
-          );
-          window.location.href = "index.html";
-          return;
-        }
+      function switchCategory(cat) {
+        if (isSpinning) return;
+        activeCategory = cat;
+        localStorage.setItem("spinner_active_category", cat);
+        loadSpinnerData(cat);
+      }
 
-        items = JSON.parse(savedItems);
-        sequence = JSON.parse(savedSeq);
+      function loadSpinnerData(cat) {
+        // Update Tab UI
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          if (btn.dataset.cat === cat) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
 
-        if (savedDisabled) {
-          disabledIndices = new Set(JSON.parse(savedDisabled));
+        // Load Items
+        const savedItems = localStorage.getItem(`spinner_items_${cat}`);
+        items = savedItems ? JSON.parse(savedItems) : defaultData[cat].items;
+
+        // Load Sequence
+        const savedSeq = localStorage.getItem(`spinner_sequence_${cat}`);
+        sequence = savedSeq ? JSON.parse(savedSeq) : defaultData[cat].seq;
+
+        // Load Disabled Items
+        const savedDisabled = localStorage.getItem(`spinner_disabled_${cat}`);
+        disabledIndices = savedDisabled
+          ? new Set(JSON.parse(savedDisabled))
+          : new Set();
+
+        // Reset Display
+        resultBox.classList.remove("active");
+        resultValue.classList.remove("animate");
+
+        if (disabledIndices.size >= items.length) {
+          spinBtn.disabled = true;
+          resultLabel.innerText = "SELESAI";
+          resultValue.innerText = "Semua Nilai Telah Terpilih!";
+          resultValue.style.color = "#ef4444";
+          resultValue.style.fontSize = "1.5rem";
+        } else {
+          spinBtn.disabled = false;
+          resultLabel.innerText = "SIAP MEMUTAR";
+          resultValue.innerText = "-";
+          resultValue.style.color = "#f59e0b";
+          resultValue.style.fontSize = "2.6rem";
         }
 
         drawWheel();
-        checkAllDisabled();
-      };
+      }
 
       function drawWheel() {
         const numOptions = items.length;
@@ -274,7 +404,6 @@
           const angle = i * arcSize;
           const isDisabled = disabledIndices.has(i);
 
-          // 1. Gambar Sektor Warna (Greyed out jika disabled)
           ctx.beginPath();
           ctx.fillStyle = isDisabled ? "#334155" : colors[i % colors.length];
           ctx.moveTo(radius, radius);
@@ -282,18 +411,15 @@
           ctx.lineTo(radius, radius);
           ctx.fill();
 
-          // Border tipis antar sektor
           ctx.strokeStyle = "#0f172a";
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // 2. Tulis Teks Nilai (Sangat Jelas dengan Outline/Strok)
           ctx.save();
           ctx.translate(radius, radius);
           ctx.rotate(angle + arcSize / 2);
           ctx.textAlign = "right";
 
-          // Ukuran font adaptif
           const fontSize = Math.max(
             14,
             Math.min(22, Math.floor(300 / numOptions)),
@@ -305,11 +431,9 @@
           const textY = fontSize / 3;
 
           if (isDisabled) {
-            // Teks Greyout & Coret
             ctx.fillStyle = "#94a3b8";
             ctx.fillText(text, textX, textY);
 
-            // Garis dicoret (Strikethrough)
             const textMetrics = ctx.measureText(text);
             ctx.beginPath();
             ctx.strokeStyle = "#ef4444";
@@ -318,37 +442,23 @@
             ctx.lineTo(textX, textY - fontSize / 3);
             ctx.stroke();
           } else {
-            // Teks Sangat Kontras dengan Garis Tepi (Text Outline)
             ctx.strokeStyle = "#000000";
             ctx.lineWidth = 4;
             ctx.lineJoin = "round";
-            ctx.strokeText(text, textX, textY); // Outline Hitam
+            ctx.strokeText(text, textX, textY);
 
             ctx.fillStyle = "#ffffff";
-            ctx.fillText(text, textX, textY); // Teks Putih
+            ctx.fillText(text, textX, textY);
           }
 
           ctx.restore();
         }
       }
 
-      function checkAllDisabled() {
-        if (disabledIndices.size >= items.length) {
-          spinBtn.disabled = true;
-          resultLabel.innerText = "SELESAI";
-          resultValue.innerText = "Semua Nilai Telah Terpilih!";
-          resultValue.style.color = "#ef4444";
-          resultValue.style.fontSize = "1.5rem";
-          return true;
-        }
-        return false;
-      }
-
       function spin() {
         if (isSpinning) return;
-        if (checkAllDisabled()) return;
+        if (disabledIndices.size >= items.length) return;
 
-        // Cari item dari sequence yang BELUM di-disabled
         let targetIndex = -1;
         for (let i = 0; i < sequence.length; i++) {
           const candidateIndex = sequence[i];
@@ -358,7 +468,6 @@
           }
         }
 
-        // Fallback jika sequence sudah terpakai semua tapi masih ada opsi tersisa
         if (targetIndex === -1) {
           for (let i = 0; i < items.length; i++) {
             if (!disabledIndices.has(i)) {
@@ -368,7 +477,6 @@
           }
         }
 
-        // Reset UI Hasil saat spin berlangsung
         resultBox.classList.remove("active");
         resultValue.classList.remove("animate");
         resultLabel.innerText = "MEMUTAR...";
@@ -382,47 +490,46 @@
         const numOptions = items.length;
         const sliceAngle = 360 / numOptions;
 
-        // Hitung derajat agar berhenti tepat di jarum penunjuk (270 derajat)
         const targetSegmentCenter = targetIndex * sliceAngle + sliceAngle / 2;
         const stopAngle = (270 - targetSegmentCenter + 360) % 360;
 
-        // Tambahkan 5 putaran penuh (1800 deg)
         const extraRounds = 360 * 5;
         const currentMod = currentRotation % 360;
         let nextRotation =
           currentRotation + (360 - currentMod) + extraRounds + stopAngle;
 
-        // Animasi Putaran
         canvas.style.transition =
           "transform 4s cubic-bezier(0.15, 0.9, 0.2, 1)";
         canvas.style.transform = `rotate(${nextRotation}deg)`;
 
         currentRotation = nextRotation;
 
-        // Ketika Animasi Selesai
         setTimeout(() => {
           isSpinning = false;
 
-          // Tandai item ini sebagai disabled & simpan
           disabledIndices.add(targetIndex);
           localStorage.setItem(
-            "spinner_disabled",
+            `spinner_disabled_${activeCategory}`,
             JSON.stringify(Array.from(disabledIndices)),
           );
 
-          // Tampilkan Hasil Utama
-          resultLabel.innerText = "HASIL TERPILIH";
+          const isLastItem = disabledIndices.size >= items.length;
+
+          resultLabel.innerText = isLastItem
+            ? "HASIL TERAKHIR TERPILIH 🎉"
+            : "HASIL TERPILIH 🎉";
           resultValue.innerText = items[targetIndex];
           resultValue.style.color = "#f59e0b";
+          resultValue.style.fontSize = "2.6rem";
 
           resultBox.classList.add("active");
           resultValue.classList.add("animate");
 
-          // Redraw roda untuk menampilkan status disabled yang baru
           drawWheel();
 
-          // Cek apakah masih ada nilai tersisa
-          if (!checkAllDisabled()) {
+          if (isLastItem) {
+            spinBtn.disabled = true;
+          } else {
             spinBtn.disabled = false;
           }
         }, 4000);
@@ -432,20 +539,12 @@
         if (isSpinning) return;
         if (
           confirm(
-            "Apakah Anda yakin ingin mengaktifkan kembali semua nilai yang di-disabled?",
+            `Reset status terpakai untuk kategori ${activeCategory.replace("_", " ")}?`,
           )
         ) {
           disabledIndices.clear();
-          localStorage.removeItem("spinner_disabled");
-
-          spinBtn.disabled = false;
-          resultLabel.innerText = "SIAP MEMUTAR";
-          resultValue.innerText = "-";
-          resultValue.style.color = "#f59e0b";
-          resultValue.style.fontSize = "2.6rem";
-          resultBox.classList.remove("active");
-
-          drawWheel();
+          localStorage.removeItem(`spinner_disabled_${activeCategory}`);
+          loadSpinnerData(activeCategory);
         }
       }
     </script>
