@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pengaturan Spinner</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --accent-color: #f59e0b;
+        --accent-hover: #d97706;
+        --text-color: #f8fafc;
+        --border-color: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+      }
+
+      h1 {
+        margin-bottom: 20px;
+        color: var(--accent-color);
+        font-size: 1.6rem;
+        text-align: center;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      textarea,
+      input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        background: #0f172a;
+        border: 1px solid var(--border-color);
+        color: #fff;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        resize: vertical;
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
+
+      .hint {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 6px;
+        line-height: 1.4;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-color);
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        margin-top: 10px;
+      }
+
+      .btn:hover {
+        background: var(--accent-hover);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Pengaturan Spinner</h1>
+
+      <form id="settingForm">
+        <div class="form-group">
+          <label for="items">Daftar Nilai / Variabel (1 per baris):</label>
+          <textarea
+            id="items"
+            rows="6"
+            placeholder="Masukkan opsi di sini..."
+            required
+          >
+Opsi 1
+Opsi 2
+Opsi 3
+Opsi 4
+Opsi 5</textarea
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="sequence">Urutan Kemunculan Spin (Pisahkan koma):</label>
+          <input
+            type="text"
+            id="sequence"
+            value="1, 3, 4, 5, 2"
+            placeholder="Contoh: 1, 3, 4, 5, 2"
+            required
+          />
+          <div class="hint">
+            * Nomor disesuaikan dengan urutan baris opsi (Dimulai dari angka
+            1).<br />
+            * Putaran spin akan secara otomatis mengikuti urutan angka ini.
+          </div>
+        </div>
+
+        <button type="submit" class="btn">Simpan & Buka Spinner ➔</button>
+      </form>
+    </div>
+
+    <script>
+      // Muat data tersimpan saat pertama kali dibuka (jika ada)
+      window.onload = () => {
+        const savedItems = localStorage.getItem("spinner_items");
+        const savedSeq = localStorage.getItem("spinner_sequence");
+
+        if (savedItems)
+          document.getElementById("items").value =
+            JSON.parse(savedItems).join("\n");
+        if (savedSeq)
+          document.getElementById("sequence").value = JSON.parse(savedSeq)
+            .map((n) => n + 1)
+            .join(", ");
+      };
+
+      document
+        .getElementById("settingForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Ambil & parse nilai dari textarea
+          const rawItems = document.getElementById("items").value.split("\n");
+          const items = rawItems
+            .map((item) => item.trim())
+            .filter((item) => item !== "");
+
+          if (items.length < 2) {
+            alert("Harap masukkan minimal 2 opsi/variabel!");
+            return;
+          }
+
+          // Ambil & parse urutan kemunculan (diubah ke index 0-based)
+          const rawSeq = document.getElementById("sequence").value.split(",");
+          const sequence = rawSeq
+            .map((num) => parseInt(num.trim()) - 1)
+            .filter((num) => !isNaN(num) && num >= 0 && num < items.length);
+
+          if (sequence.length === 0) {
+            alert(
+              "Urutan kemunculan tidak valid atau berada di luar jumlah opsi!",
+            );
+            return;
+          }
+
+          // Simpan ke localStorage
+          localStorage.setItem("spinner_items", JSON.stringify(items));
+          localStorage.setItem("spinner_sequence", JSON.stringify(sequence));
+          localStorage.setItem("spinner_current_index", "0"); // Reset urutan spin ke awal
+
+          // Pindah ke halaman Spinner
+          window.location.href = "spinner.html";
+        });
+    </script>
+  </body>
+</html>

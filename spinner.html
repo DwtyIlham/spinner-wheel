@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roda Spinner</title>
+    <style>
+      :root {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --accent-color: #f59e0b;
+        --accent-hover: #d97706;
+        --text-color: #f8fafc;
+        --border-color: #334155;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .spinner-card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--border-color);
+        position: relative;
+        width: 100%;
+        max-width: 480px;
+      }
+
+      .header-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .back-link,
+      .reset-btn {
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover,
+      .reset-btn:hover {
+        color: var(--accent-color);
+      }
+
+      .wheel-wrapper {
+        position: relative;
+        width: 340px;
+        height: 340px;
+        margin-top: 10px;
+      }
+
+      /* Jarum Penunjuk */
+      .pointer {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 16px solid transparent;
+        border-right: 16px solid transparent;
+        border-top: 32px solid #ef4444;
+        z-index: 10;
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7));
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+      }
+
+      .btn-spin {
+        margin-top: 25px;
+        padding: 15px 50px;
+        background: var(--accent-color);
+        color: #000;
+        border: none;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+        transition: all 0.2s ease;
+      }
+
+      .btn-spin:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(245, 158, 11, 0.6);
+      }
+
+      .btn-spin:disabled {
+        background: #475569;
+        color: #94a3b8;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+
+      /* =========================================================
+       VOCAL POINT HASIL SPINNER (SANGAT JELAS & HIGH CONTRAST)
+       ========================================================= */
+      .result-container {
+        margin-top: 25px;
+        width: 100%;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #090d16;
+        border-radius: 14px;
+        border: 2px solid #334155;
+        padding: 15px 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Efek sorot ketika hasil keluar */
+      .result-container.active {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+        background: #111827;
+      }
+
+      .result-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #94a3b8;
+        margin-bottom: 6px;
+        font-weight: 700;
+      }
+
+      /* Vocal Point Teks Utama */
+      .result-value {
+        font-size: 2.6rem; /* Font Size Ekstra Besar */
+        font-weight: 900;
+        color: #f59e0b;
+        text-align: center;
+        word-break: break-word;
+        line-height: 1.1;
+        text-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+      }
+
+      /* Keyframe Animasi Zoom In Pop-Up */
+      .result-value.animate {
+        animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+
+      @keyframes popIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.4);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="spinner-card">
+      <div class="header-actions">
+        <a href="index.html" class="back-link">⚙️ Edit Pengaturan</a>
+        <button class="reset-btn" onclick="resetDisabledItems()">
+          🔄 Reset Nilai Disabled
+        </button>
+      </div>
+
+      <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="400" height="400"></canvas>
+      </div>
+
+      <button id="spinBtn" class="btn-spin" onclick="spin()">SPIN!</button>
+
+      <!-- Vocal Point Hasil -->
+      <div id="resultBox" class="result-container">
+        <div class="result-label" id="resultLabel">SIAP MEMUTAR</div>
+        <div id="resultValue" class="result-value">-</div>
+      </div>
+    </div>
+
+    <script>
+      const colors = [
+        "#f43f5e",
+        "#8b5cf6",
+        "#06b6d4",
+        "#10b981",
+        "#f59e0b",
+        "#ec4899",
+        "#3b82f6",
+        "#84cc16",
+      ];
+
+      let items = [];
+      let sequence = [];
+      let disabledIndices = new Set(); // Menyimpan index item yang di-disabled
+
+      let currentRotation = 0;
+      let isSpinning = false;
+
+      const canvas = document.getElementById("wheel");
+      const ctx = canvas.getContext("2d");
+      const spinBtn = document.getElementById("spinBtn");
+      const resultBox = document.getElementById("resultBox");
+      const resultLabel = document.getElementById("resultLabel");
+      const resultValue = document.getElementById("resultValue");
+
+      window.onload = () => {
+        const savedItems = localStorage.getItem("spinner_items");
+        const savedSeq = localStorage.getItem("spinner_sequence");
+        const savedDisabled = localStorage.getItem("spinner_disabled");
+
+        if (!savedItems || !savedSeq) {
+          alert(
+            "Data pengaturan belum ada, Anda akan diarahkan ke halaman setting.",
+          );
+          window.location.href = "index.html";
+          return;
+        }
+
+        items = JSON.parse(savedItems);
+        sequence = JSON.parse(savedSeq);
+
+        if (savedDisabled) {
+          disabledIndices = new Set(JSON.parse(savedDisabled));
+        }
+
+        drawWheel();
+        checkAllDisabled();
+      };
+
+      function drawWheel() {
+        const numOptions = items.length;
+        const arcSize = (2 * Math.PI) / numOptions;
+        const radius = canvas.width / 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < numOptions; i++) {
+          const angle = i * arcSize;
+          const isDisabled = disabledIndices.has(i);
+
+          // 1. Gambar Sektor Warna (Greyed out jika disabled)
+          ctx.beginPath();
+          ctx.fillStyle = isDisabled ? "#334155" : colors[i % colors.length];
+          ctx.moveTo(radius, radius);
+          ctx.arc(radius, radius, radius, angle, angle + arcSize);
+          ctx.lineTo(radius, radius);
+          ctx.fill();
+
+          // Border tipis antar sektor
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // 2. Tulis Teks Nilai (Sangat Jelas dengan Outline/Strok)
+          ctx.save();
+          ctx.translate(radius, radius);
+          ctx.rotate(angle + arcSize / 2);
+          ctx.textAlign = "right";
+
+          // Ukuran font adaptif
+          const fontSize = Math.max(
+            14,
+            Math.min(22, Math.floor(300 / numOptions)),
+          );
+          ctx.font = `900 ${fontSize}px "Segoe UI", sans-serif`;
+
+          const text = items[i];
+          const textX = radius - 25;
+          const textY = fontSize / 3;
+
+          if (isDisabled) {
+            // Teks Greyout & Coret
+            ctx.fillStyle = "#94a3b8";
+            ctx.fillText(text, textX, textY);
+
+            // Garis dicoret (Strikethrough)
+            const textMetrics = ctx.measureText(text);
+            ctx.beginPath();
+            ctx.strokeStyle = "#ef4444";
+            ctx.lineWidth = 3;
+            ctx.moveTo(textX - textMetrics.width, textY - fontSize / 3);
+            ctx.lineTo(textX, textY - fontSize / 3);
+            ctx.stroke();
+          } else {
+            // Teks Sangat Kontras dengan Garis Tepi (Text Outline)
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
+            ctx.lineJoin = "round";
+            ctx.strokeText(text, textX, textY); // Outline Hitam
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(text, textX, textY); // Teks Putih
+          }
+
+          ctx.restore();
+        }
+      }
+
+      function checkAllDisabled() {
+        if (disabledIndices.size >= items.length) {
+          spinBtn.disabled = true;
+          resultLabel.innerText = "SELESAI";
+          resultValue.innerText = "Semua Nilai Telah Terpilih!";
+          resultValue.style.color = "#ef4444";
+          resultValue.style.fontSize = "1.5rem";
+          return true;
+        }
+        return false;
+      }
+
+      function spin() {
+        if (isSpinning) return;
+        if (checkAllDisabled()) return;
+
+        // Cari item dari sequence yang BELUM di-disabled
+        let targetIndex = -1;
+        for (let i = 0; i < sequence.length; i++) {
+          const candidateIndex = sequence[i];
+          if (!disabledIndices.has(candidateIndex)) {
+            targetIndex = candidateIndex;
+            break;
+          }
+        }
+
+        // Fallback jika sequence sudah terpakai semua tapi masih ada opsi tersisa
+        if (targetIndex === -1) {
+          for (let i = 0; i < items.length; i++) {
+            if (!disabledIndices.has(i)) {
+              targetIndex = i;
+              break;
+            }
+          }
+        }
+
+        // Reset UI Hasil saat spin berlangsung
+        resultBox.classList.remove("active");
+        resultValue.classList.remove("animate");
+        resultLabel.innerText = "MEMUTAR...";
+        resultValue.innerText = "...";
+        resultValue.style.color = "#94a3b8";
+        resultValue.style.fontSize = "2.6rem";
+
+        isSpinning = true;
+        spinBtn.disabled = true;
+
+        const numOptions = items.length;
+        const sliceAngle = 360 / numOptions;
+
+        // Hitung derajat agar berhenti tepat di jarum penunjuk (270 derajat)
+        const targetSegmentCenter = targetIndex * sliceAngle + sliceAngle / 2;
+        const stopAngle = (270 - targetSegmentCenter + 360) % 360;
+
+        // Tambahkan 5 putaran penuh (1800 deg)
+        const extraRounds = 360 * 5;
+        const currentMod = currentRotation % 360;
+        let nextRotation =
+          currentRotation + (360 - currentMod) + extraRounds + stopAngle;
+
+        // Animasi Putaran
+        canvas.style.transition =
+          "transform 4s cubic-bezier(0.15, 0.9, 0.2, 1)";
+        canvas.style.transform = `rotate(${nextRotation}deg)`;
+
+        currentRotation = nextRotation;
+
+        // Ketika Animasi Selesai
+        setTimeout(() => {
+          isSpinning = false;
+
+          // Tandai item ini sebagai disabled & simpan
+          disabledIndices.add(targetIndex);
+          localStorage.setItem(
+            "spinner_disabled",
+            JSON.stringify(Array.from(disabledIndices)),
+          );
+
+          // Tampilkan Hasil Utama
+          resultLabel.innerText = "HASIL TERPILIH";
+          resultValue.innerText = items[targetIndex];
+          resultValue.style.color = "#f59e0b";
+
+          resultBox.classList.add("active");
+          resultValue.classList.add("animate");
+
+          // Redraw roda untuk menampilkan status disabled yang baru
+          drawWheel();
+
+          // Cek apakah masih ada nilai tersisa
+          if (!checkAllDisabled()) {
+            spinBtn.disabled = false;
+          }
+        }, 4000);
+      }
+
+      function resetDisabledItems() {
+        if (isSpinning) return;
+        if (
+          confirm(
+            "Apakah Anda yakin ingin mengaktifkan kembali semua nilai yang di-disabled?",
+          )
+        ) {
+          disabledIndices.clear();
+          localStorage.removeItem("spinner_disabled");
+
+          spinBtn.disabled = false;
+          resultLabel.innerText = "SIAP MEMUTAR";
+          resultValue.innerText = "-";
+          resultValue.style.color = "#f59e0b";
+          resultValue.style.fontSize = "2.6rem";
+          resultBox.classList.remove("active");
+
+          drawWheel();
+        }
+      }
+    </script>
+  </body>
+</html>
